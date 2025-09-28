@@ -1,0 +1,8 @@
+--- Relatorio de Conexao ---
+Servidor: 127.0.0.1:23456
+Inicio da Conexao: Sun Sep 28 15:33:18 2025
+Fim da Conexao:    Sun Sep 28 15:33:18 2025
+Duracao (s): 0.0010
+Bytes Enviados:  26
+Bytes Recebidos: 48
+Taxa de Transmissao (Bytes/s): 73882.05
