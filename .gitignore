@@ -1,3 +1,4 @@
 *.bin
-LogFiles/*.txt
+src/LogFiles/*.txt
 *.pcapng
+__pycache__/

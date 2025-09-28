@@ -42,7 +42,7 @@ Siga estes passos para configurar o ambiente e executar o sistema.
 
 ### Passo 2: Iniciar o Servidor
 
-1.  Abra um terminal no diretório raiz do projeto.
+1.  Abra um terminal no diretório src do projeto.
 2.  Execute o seguinte comando para iniciar o servidor:
     ```bash
     python server.py
@@ -54,7 +54,7 @@ Siga estes passos para configurar o ambiente e executar o sistema.
 
 ### Passo 3: Iniciar e Usar o Cliente
 
-1.  Abra um **novo terminal** no diretório raiz do projeto.
+1.  Abra um **novo terminal** no diretório src do projeto.
 2.  Execute `cliente.py` informando o IP e a porta do servidor. Para uma conexão local, use `127.0.0.1`.
     ```bash
     python client.py 127.0.0.1 23456
@@ -103,4 +103,4 @@ Ao encerrar uma sessão com o comando `quit`, um arquivo de log é criado automa
 
 ## Testando Concorrência
 
-Para testar o atendimento concorrente do servidor, abra vários terminais e inicie uma instância do `cliente.py` em cada um, todos conectados ao mesmo servidor. Execute comandos de forma simultânea e observe o log do servidor processando as requisições.
+Para testar o atendimento concorrente do servidor, execute o arquivo `clientes_concorrentes.bat`.
