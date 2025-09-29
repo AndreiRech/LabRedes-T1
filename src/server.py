@@ -10,23 +10,28 @@ HOST = '0.0.0.0'
 PORT = 23456
 DIR = 'ServerFiles'
 
+# --- Semaforo ---
+file_system_semaphore = threading.Semaphore(1)
+
 # --- Lógica Principal do Servidor ---
 def handle_put(addr, conn, payload):
     """
     Gerencia o recebimento de arquivos enviados pelos clientes.
     """
-    filename = payload.decode('utf-8')
-    print(f"[OP: PUT] | Pedido para o arquivo '{filename}' de {addr}")
-                
-    file_path = os.path.join(DIR, os.path.basename(filename))
-    if os.path.exists(file_path):
-        error_msg = f"ERRO: Arquivo '{filename}' ja existe.".encode('utf-8')
-        network.send_message(conn, protocol.OP_ERROR, error_msg)
-        return
+    with file_system_semaphore:
+        filename = payload.decode('utf-8')
+        print(f"[OP: PUT] | Pedido para o arquivo '{filename}' de {addr}")
+                    
+        file_path = os.path.join(DIR, os.path.basename(filename))
+        if os.path.exists(file_path):
+            error_msg = f"ERRO: Arquivo '{filename}' ja existe.".encode('utf-8')
+            network.send_message(conn, protocol.OP_ERROR, error_msg)
+            return
 
-    # Envia confirmação para o cliente iniciar o envio do arquivo
-    network.send_message(conn, protocol.OP_SUCCESS)
-
+        # Envia confirmação para o cliente iniciar o envio do arquivo
+        network.send_message(conn, protocol.OP_SUCCESS)
+    
+    # Recebe o cabeçalho especial com o tamanho do arquivo
     header_data = conn.recv(protocol.HEADER_SIZE)
     if not header_data: return "BREAK"
                 
@@ -42,9 +47,10 @@ def handle_put(addr, conn, payload):
             if not chunk: return "BREAK"
             f.write(chunk)
             bytes_received += len(chunk)
-
-    print(f"Arquivo '{filename}' ({file_size} bytes) recebido de {addr}.")
-    network.send_message(conn, protocol.OP_SUCCESS, "Arquivo recebido com sucesso!".encode('utf-8'))
+            
+    with file_system_semaphore:
+        print(f"Arquivo '{filename}' ({file_size} bytes) recebido de {addr}.")
+        network.send_message(conn, protocol.OP_SUCCESS, "Arquivo recebido com sucesso!".encode('utf-8'))
 
 def handle_list(addr, conn):
     """
@@ -52,18 +58,18 @@ def handle_list(addr, conn):
     """
     print(f"[OP: LIST] | Recebido de {addr}")
                 
-    try:
-        files = os.listdir(DIR)
-        file_list_str = "\n".join(files) if files else "Nenhum arquivo no servidor."
-        network.send_message(conn, protocol.OP_SUCCESS, file_list_str.encode('utf-8'))
-    except Exception as e:
-        error_msg = f"Erro ao listar arquivos: {e}".encode('utf-8')
-        network.send_message(conn, protocol.OP_ERROR, error_msg)
+    with file_system_semaphore:
+        try:
+            files = os.listdir(DIR)
+            file_list_str = "\n".join(files) if files else "Nenhum arquivo no servidor."
+            network.send_message(conn, protocol.OP_SUCCESS, file_list_str.encode('utf-8'))
+        except Exception as e:
+            error_msg = f"Erro ao listar arquivos: {e}".encode('utf-8')
+            network.send_message(conn, protocol.OP_ERROR, error_msg)
     
 def handle_client(conn, addr):
     """
     Gerencia a conexão com um único cliente usando as funções auxiliares.
-    O loop principal agora é muito mais legível.
     """
     print(f"[NOVA CONEXAO] | {addr} conectado.")
 
